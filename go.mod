@@ -1,4 +1,4 @@
-module bitrue-api
+module bitrue
 
 go 1.13
 
