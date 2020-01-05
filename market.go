@@ -180,6 +180,14 @@ func (bd *BalanceData) GetLock() float64 {
 	return f
 }
 
+func (bd *BalanceData) String() string {
+	b, err := json.Marshal(bd)
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+
 type Balance struct {
 	UpdateTime int64
 	Balances   []*BalanceData
