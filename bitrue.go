@@ -41,14 +41,12 @@ func (ex *Exchange) initMinQuoteAmount() {
 	ex.MinQuoteAmountMap["BTRETH"] = 0.01
 }
 
-func (ex *Exchange) Update(symbol string) bool {
+func (ex *Exchange) Update(symbol string, price float64) bool {
 	symbol = strings.ToUpper(symbol)
 	if a, ok := ex.MinQuoteAmountMap[symbol]; ok {
-		if price, ok := ex.GetTickerPrice(symbol).Float64(); ok {
-			amount, _ := ex.TruncAmount(symbol, a/price)
-			ex.MinBaseAmountMap[symbol] = amount
-			return true
-		}
+		amount, _ := ex.TruncAmount(symbol, a/price)
+		ex.MinBaseAmountMap[symbol] = amount
+		return true
 	}
 	return false
 }
@@ -62,7 +60,8 @@ func (ex *Exchange) GetMinAmount(symbol string) (float64, bool) {
 }
 func (ex *Exchange) GetUpdateMinAmount(symbol string) (float64, bool) {
 	symbol = strings.ToUpper(symbol)
-	ex.Update(symbol)
+	price, _ := ex.GetTickerPrice(symbol).Float64()
+	ex.Update(symbol, price)
 	if amount, ok := ex.MinBaseAmountMap[symbol]; ok {
 		return amount, true
 	}
