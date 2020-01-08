@@ -15,7 +15,6 @@ type Exchange struct {
 	symbols           map[string]string
 	SymbolInfos       []*SymbolData
 	MinQuoteAmountMap map[string]float64
-	MinBaseAmountMap  map[string]float64
 }
 
 var accessKey string
@@ -26,7 +25,6 @@ func NewExchange(ak string, sk string) *Exchange {
 	secretKey = sk
 	ex := &Exchange{
 		MinQuoteAmountMap: make(map[string]float64),
-		MinBaseAmountMap:  make(map[string]float64),
 	}
 	ex.getSymbols()
 	ex.initMinQuoteAmount()
@@ -41,29 +39,10 @@ func (ex *Exchange) initMinQuoteAmount() {
 	ex.MinQuoteAmountMap["BTRETH"] = 0.01
 }
 
-func (ex *Exchange) Update(symbol string, price float64) bool {
+func (ex *Exchange) GetQuoteAmount(symbol string) (float64, bool) {
 	symbol = strings.ToUpper(symbol)
 	if a, ok := ex.MinQuoteAmountMap[symbol]; ok {
-		amount, _ := ex.TruncAmount(symbol, a/price)
-		ex.MinBaseAmountMap[symbol] = amount
-		return true
-	}
-	return false
-}
-
-func (ex *Exchange) GetMinAmount(symbol string) (float64, bool) {
-	symbol = strings.ToUpper(symbol)
-	if amount, ok := ex.MinBaseAmountMap[symbol]; ok {
-		return amount, true
-	}
-	return 0, false
-}
-func (ex *Exchange) GetUpdateMinAmount(symbol string) (float64, bool) {
-	symbol = strings.ToUpper(symbol)
-	price, _ := ex.GetTickerPrice(symbol).Float64()
-	ex.Update(symbol, price)
-	if amount, ok := ex.MinBaseAmountMap[symbol]; ok {
-		return amount, true
+		return a, true
 	}
 	return 0, false
 }
