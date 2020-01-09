@@ -39,7 +39,7 @@ func (ex *Exchange) getSymbols() {
 	ex.SymbolInfos = symbolInfos
 }
 
-func (ex *Exchange) getSymbolInfo(symbol string) *SymbolData {
+func (ex *Exchange) GetSymbolInfo(symbol string) *SymbolData {
 	symbol = strings.ToUpper(symbol)
 	for _, symbolInfo := range ex.SymbolInfos {
 		if symbolInfo.Symbol == symbol {
@@ -205,7 +205,7 @@ func (ex *Exchange) Cancel(symbol string, orderId int64) bool {
 }
 
 func (ex *Exchange) TruncPrice(symbol string, price float64) (float64, bool) {
-	symbolInfo := ex.getSymbolInfo(symbol)
+	symbolInfo := ex.GetSymbolInfo(symbol)
 	if symbolInfo != nil {
 		pre := math.Pow10(symbolInfo.QuotePrecision)
 		tPrice := math.Round(price*pre) / pre
@@ -215,7 +215,7 @@ func (ex *Exchange) TruncPrice(symbol string, price float64) (float64, bool) {
 }
 
 func (ex *Exchange) TruncAmount(symbol string, amount float64) (float64, bool) {
-	symbolInfo := ex.getSymbolInfo(symbol)
+	symbolInfo := ex.GetSymbolInfo(symbol)
 	if symbolInfo != nil {
 		pre := math.Pow10(symbolInfo.BasePrecision)
 		tAmount := math.Round(amount*pre) / pre
@@ -225,7 +225,7 @@ func (ex *Exchange) TruncAmount(symbol string, amount float64) (float64, bool) {
 }
 
 func (ex *Exchange) GetTiny(symbol string) float64 {
-	symbolInfo := ex.getSymbolInfo(symbol)
+	symbolInfo := ex.GetSymbolInfo(symbol)
 	if symbolInfo != nil {
 		return 1 / math.Pow10(symbolInfo.QuotePrecision)
 	}
