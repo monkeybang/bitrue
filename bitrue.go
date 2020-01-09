@@ -12,8 +12,9 @@ import (
 )
 
 type Exchange struct {
-	symbols     map[string]string
-	SymbolInfos []*SymbolData
+	symbols           map[string]string
+	SymbolInfos       []*SymbolData
+	MinQuoteAmountMap map[string]float64
 }
 
 var accessKey string
@@ -22,9 +23,28 @@ var secretKey string
 func NewExchange(ak string, sk string) *Exchange {
 	accessKey = ak
 	secretKey = sk
-	ex := &Exchange{}
+	ex := &Exchange{
+		MinQuoteAmountMap: make(map[string]float64),
+	}
 	ex.getSymbols()
+	ex.initMinQuoteAmount()
 	return ex
+}
+
+//need set yourself
+func (ex *Exchange) initMinQuoteAmount() {
+	ex.MinQuoteAmountMap["BTRUSDT"] = 10
+	ex.MinQuoteAmountMap["BTRXRP"] = 10
+	ex.MinQuoteAmountMap["BTRBTC"] = 0.0001
+	ex.MinQuoteAmountMap["BTRETH"] = 0.01
+}
+
+func (ex *Exchange) GetQuoteAmount(symbol string) (float64, bool) {
+	symbol = strings.ToUpper(symbol)
+	if a, ok := ex.MinQuoteAmountMap[symbol]; ok {
+		return a, true
+	}
+	return 0, false
 }
 
 func (ex *Exchange) getSymbols() {

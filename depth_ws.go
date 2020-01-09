@@ -21,8 +21,8 @@ func SubDepthWs(symbol, address string) chan *DepthWs {
 		log.Println(err)
 	}
 
-	msgType, message, err := conn.ReadMessage()
-	log.Println(msgType)
+	_, message, err := conn.ReadMessage()
+	//log.Println(msgType)
 
 	unzipmsg, _ := ParseGzip(message)
 	log.Printf(string(unzipmsg))
@@ -40,7 +40,7 @@ func SubDepthWs(symbol, address string) chan *DepthWs {
 				}
 
 				ms := TimestampNowMs()
-				log.Printf(string(unzipmsg))
+				//log.Printf(string(unzipmsg))
 				cmd := string(unzipmsg[2:6])
 				if cmd == "ping" {
 					pong := fmt.Sprintf("{\"pong\":%d}", ms)

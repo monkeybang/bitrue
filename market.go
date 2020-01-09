@@ -9,6 +9,8 @@ import (
 
 const https = "https://www.bitrue.com"
 
+var minAmount = make(map[string]float64)
+
 type SymbolReturn struct {
 	Symbols *[]SymbolData `json:"symbols"`
 }
