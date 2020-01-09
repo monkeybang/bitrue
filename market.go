@@ -18,6 +18,8 @@ type SymbolData struct {
 	Status         string
 	BasePrecision  int `json:"baseAssetPrecision"`
 	QuotePrecision int
+	baseAsset      string
+	quoteAsset     string
 }
 
 type KlineData struct {
