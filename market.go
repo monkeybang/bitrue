@@ -20,6 +20,8 @@ type SymbolData struct {
 	Status         string
 	BasePrecision  int `json:"baseAssetPrecision"`
 	QuotePrecision int
+	BaseAsset      string
+	QuoteAsset     string
 }
 
 type KlineData struct {
@@ -180,6 +182,14 @@ func (bd *BalanceData) GetLock() float64 {
 		log.Println("cast to float err:", bd.Free.String())
 	}
 	return f
+}
+
+func (bd *BalanceData) String() string {
+	b, err := json.Marshal(bd)
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
 }
 
 type Balance struct {
