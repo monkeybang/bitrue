@@ -148,7 +148,7 @@ func (ex *Exchange) BuyLimit(symbol string, price float64, amount float64) int64
 
 	orderId := gjson.Get(data, "orderId").Int()
 	if orderId == 0 {
-		log.Println(data)
+		log.Println(data, symbol, price, amount)
 	}
 	return orderId
 }
@@ -163,7 +163,7 @@ func (ex *Exchange) SellLimit(symbol string, price float64, amount float64) int6
 	data := SignedRequest(POST, https+"/api/v1/order", params)
 	orderId := gjson.Get(data, "orderId").Int()
 	if orderId == 0 {
-		log.Println(data)
+		log.Println(data, symbol, price, amount)
 	}
 	return orderId
 }
@@ -202,6 +202,7 @@ func (ex *Exchange) GetBalance(currency string) *BalanceData {
 	err := json.Unmarshal([]byte(body), balance)
 	if err != nil {
 		log.Println(err, body)
+		return nil
 	}
 
 	for _, balanceData := range balance.Balances {
