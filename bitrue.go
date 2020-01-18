@@ -76,7 +76,7 @@ func (ex *Exchange) GetDepth(symbol string) *Depth {
 	depth := &Depth{}
 	err := json.Unmarshal([]byte(body), depth)
 	if err != nil {
-		log.Println(err)
+		log.Println(err, body)
 		return nil
 	}
 	return depth
@@ -89,7 +89,7 @@ func (ex *Exchange) GetTickerPrice(symbol string) *decimal.Big {
 	priceTicker := &PriceTicker{}
 	err := json.Unmarshal([]byte(body), priceTicker)
 	if err != nil {
-		log.Println(err)
+		log.Println(err, body)
 	}
 	return priceTicker.Price
 }
@@ -102,7 +102,7 @@ func (ex *Exchange) GetBookTicker(symbol string) *BookTicker {
 	bookTicker := &BookTicker{}
 	err := json.Unmarshal([]byte(body), bookTicker)
 	if err != nil {
-		log.Println(err)
+		log.Println(err, body)
 	}
 	return bookTicker
 }
