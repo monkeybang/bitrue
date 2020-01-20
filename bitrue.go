@@ -177,7 +177,7 @@ func (ex *Exchange) QueryOrder(symbol string, orderId int64) *OrderData {
 	order := &OrderData{}
 	err := json.Unmarshal([]byte(body), order)
 	if err != nil {
-		log.Println(err, order, body)
+		log.Println(err, body, params)
 		return nil
 	}
 	return order

@@ -109,6 +109,7 @@ func SignedRequest(method string, url string, params map[string]string) string {
 	//log.Println(d)
 	if err != nil {
 		log.Println(err)
+		return err.Error()
 	}
 	request.Header.Add("X-MBX-APIKEY", accessKey)
 	//request.Header.Add("FC-ACCESS-TIMESTAMP", timestamp)
@@ -116,12 +117,14 @@ func SignedRequest(method string, url string, params map[string]string) string {
 	httpClient := &http.Client{}
 	response, err := httpClient.Do(request)
 	if nil != err {
+		log.Println(err)
 		return err.Error()
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if nil != err {
+		log.Println(err)
 		return err.Error()
 	}
 
