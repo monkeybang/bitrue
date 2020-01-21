@@ -172,6 +172,10 @@ func (order *OrderData) GetAmount() float64 {
 	return amount
 }
 
+func (order *OrderData) IsFilled() bool {
+	return order.Status == "FILLED"
+}
+
 type BalanceData struct {
 	Currency string `json:"asset"`
 	Free     decimal.Big
