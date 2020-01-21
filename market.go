@@ -162,6 +162,16 @@ func (order *OrderData) String() string {
 	return string(data)
 }
 
+func (order *OrderData) GetPrice() float64 {
+	price, _ := order.Price.Float64()
+	return price
+}
+
+func (order *OrderData) GetAmount() float64 {
+	amount, _ := order.OrigQty.Float64()
+	return amount
+}
+
 type BalanceData struct {
 	Currency string `json:"asset"`
 	Free     decimal.Big
