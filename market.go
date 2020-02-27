@@ -148,7 +148,7 @@ type OrderData struct {
 	Price       decimal.Big
 	OrigQty     decimal.Big
 	ExecutedQty string
-	Sid         string
+	Side        string
 	Type        string
 	Status      string
 }
