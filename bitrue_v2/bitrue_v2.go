@@ -10,6 +10,7 @@ import (
 	"log"
 	"math"
 	"strings"
+	"time"
 )
 
 type Exchange struct {
@@ -49,7 +50,7 @@ func (ex *Exchange) getSymbols() {
 	symbolInfos := make([]*bitrue.SymbolData, 0)
 	err := json.Unmarshal([]byte(data.String()), &symbolInfos)
 	if err != nil {
-		log.Panicln(err)
+		log.Panicln("getSymbols error", err)
 	}
 	ex.SymbolInfos = symbolInfos
 }
@@ -62,9 +63,7 @@ func (ex *Exchange) GetQuoteAmount(symbol string) (float64, bool) {
 	return 0, false
 }
 
-
-
-func (ex *Exchange) GetSymbolInfo(symbol string) *SymbolData {
+func (ex *Exchange) GetSymbolInfo(symbol string) *bitrue.SymbolData {
 	symbol = strings.ToUpper(symbol)
 	for _, symbolInfo := range ex.SymbolInfos {
 		if symbolInfo.Symbol == symbol {
@@ -74,11 +73,12 @@ func (ex *Exchange) GetSymbolInfo(symbol string) *SymbolData {
 	return nil
 }
 
-func (ex *Exchange) GetDepth(symbol string) *Depth {
+// 获取深度数据
+func (ex *Exchange) GetDepth(symbol string) *bitrue.Depth {
 	params := make(map[string]string)
 	params["symbol"] = symbol
-	body := HttpGetRequest(https+"/api/v1/depth", params)
-	depth := &Depth{}
+	body := bitrue.HttpGetRequest(ex.Host+"/api/v1/depth", params)
+	depth := &bitrue.Depth{}
 	err := json.Unmarshal([]byte(body), depth)
 	if err != nil {
 		log.Println(err, body)
@@ -87,11 +87,12 @@ func (ex *Exchange) GetDepth(symbol string) *Depth {
 	return depth
 }
 
+// 获取交易对最新价
 func (ex *Exchange) GetTickerPrice(symbol string) *decimal.Big {
 	params := make(map[string]string)
 	params["symbol"] = symbol
-	body := HttpGetRequest(https+"/api/v1/ticker/price", params)
-	priceTicker := &PriceTicker{}
+	body := bitrue.HttpGetRequest(ex.Host+"/api/v1/ticker/price", params)
+	priceTicker := &bitrue.PriceTicker{}
 	err := json.Unmarshal([]byte(body), priceTicker)
 	if err != nil {
 		log.Println(err, body)
@@ -99,12 +100,13 @@ func (ex *Exchange) GetTickerPrice(symbol string) *decimal.Big {
 	return priceTicker.Price
 }
 
-func (ex *Exchange) GetBookTicker(symbol string) *BookTicker {
+// Best price/qty on the order book for a symbol or symbols.
+func (ex *Exchange) GetBookTicker(symbol string) *bitrue.BookTicker {
 	params := make(map[string]string)
 	params["symbol"] = symbol
-	body := HttpGetRequest(https+"/api/v1/ticker/bookTicker", params)
+	body := bitrue.HttpGetRequest(ex.Host+"/api/v1/ticker/bookTicker", params)
 
-	bookTicker := &BookTicker{}
+	bookTicker := &bitrue.BookTicker{}
 	err := json.Unmarshal([]byte(body), bookTicker)
 	if err != nil {
 		log.Println(err, body)
@@ -124,11 +126,12 @@ func (ex *Exchange) GetSellPrice(symbol string) float64 {
 	return sellPrice
 }
 
+// 24小时内的价格变化
 func (ex *Exchange) get24hr(symbol string) {
 	params := make(map[string]string)
 	params["symbol"] = symbol
 
-	body := HttpGetRequest(https+"/api/v1/ticker/24hr", params)
+	body := bitrue.HttpGetRequest(ex.Host+"/api/v1/ticker/24hr", params)
 	println(body)
 }
 
@@ -141,7 +144,7 @@ func println(str string) {
 	log.Println(pretty.Formatter(m))
 }
 
-//return orderId
+// return orderId
 func (ex *Exchange) BuyLimit(symbol string, price float64, amount float64) int64 {
 	params := make(map[string]string)
 	params["type"] = "LIMIT"
@@ -149,7 +152,8 @@ func (ex *Exchange) BuyLimit(symbol string, price float64, amount float64) int64
 	params["side"] = "BUY"
 	params["price"] = cast.ToString(price)
 	params["quantity"] = cast.ToString(amount)
-	data := SignedRequest(POST, https+"/api/v1/order", params)
+
+	data := bitrue.SignedRequestWithKey(bitrue.POST, ex.Host+"/api/v1/order", params, ex.AppKey, ex.SecretKey)
 
 	orderId := gjson.Get(data, "orderId").Int()
 	if orderId == 0 {
@@ -158,6 +162,7 @@ func (ex *Exchange) BuyLimit(symbol string, price float64, amount float64) int64
 	return orderId
 }
 
+//
 func (ex *Exchange) SellLimit(symbol string, price float64, amount float64) int64 {
 	params := make(map[string]string)
 	params["type"] = "LIMIT"
@@ -165,7 +170,7 @@ func (ex *Exchange) SellLimit(symbol string, price float64, amount float64) int6
 	params["side"] = "SELL"
 	params["price"] = cast.ToString(price)
 	params["quantity"] = cast.ToString(amount)
-	data := SignedRequest(POST, https+"/api/v1/order", params)
+	data := bitrue.SignedRequestWithKey(bitrue.POST, ex.Host+"/api/v1/order", params, ex.AppKey, ex.SecretKey)
 	orderId := gjson.Get(data, "orderId").Int()
 	if orderId == 0 {
 		log.Println(data, symbol, price, amount)
@@ -173,13 +178,13 @@ func (ex *Exchange) SellLimit(symbol string, price float64, amount float64) int6
 	return orderId
 }
 
-func (ex *Exchange) QueryOrder(symbol string, orderId int64) *OrderData {
+func (ex *Exchange) QueryOrder(symbol string, orderId int64) *bitrue.OrderData {
 	params := make(map[string]string)
 	params["symbol"] = symbol
 	params["orderId"] = cast.ToString(orderId)
 
-	body := SignedRequest(GET, https+"/api/v1/order", params)
-	order := &OrderData{}
+	body := bitrue.SignedRequestWithKey(bitrue.GET, ex.Host+"/api/v1/order", params, ex.AppKey, ex.SecretKey)
+	order := &bitrue.OrderData{}
 	err := json.Unmarshal([]byte(body), order)
 	if err != nil {
 		log.Println(err, body, params)
@@ -188,11 +193,11 @@ func (ex *Exchange) QueryOrder(symbol string, orderId int64) *OrderData {
 	return order
 }
 
-func (ex *Exchange) QueryOpenOrders(symbol string) []*OrderData {
+func (ex *Exchange) QueryOpenOrders(symbol string) []*bitrue.OrderData {
 	params := make(map[string]string)
 	params["symbol"] = symbol
-	body := SignedRequest(GET, https+"/api/v1/openOrders", params)
-	var orders []*OrderData
+	body := bitrue.SignedRequestWithKey(bitrue.GET, ex.Host+"/api/v1/openOrders", params, ex.AppKey, ex.SecretKey)
+	var orders []*bitrue.OrderData
 	err := json.Unmarshal([]byte(body), &orders)
 	if err != nil {
 		log.Println(err, body)
@@ -200,10 +205,10 @@ func (ex *Exchange) QueryOpenOrders(symbol string) []*OrderData {
 	return orders
 }
 
-func (ex *Exchange) GetBalance(currency string) *BalanceData {
+func (ex *Exchange) GetBalance(currency string) *bitrue.BalanceData {
 	params := make(map[string]string)
-	body := SignedRequest(GET, https+"/api/v1/account", params)
-	balance := &Balance{}
+	body := bitrue.SignedRequestWithKey(bitrue.GET, ex.Host+"/api/v1/account", params, ex.AppKey, ex.SecretKey)
+	balance := &bitrue.Balance{}
 	err := json.Unmarshal([]byte(body), balance)
 	if err != nil {
 		log.Println(err, body)
@@ -222,7 +227,7 @@ func (ex *Exchange) Cancel(symbol string, orderId int64) bool {
 	params := make(map[string]string)
 	params["symbol"] = symbol
 	params["orderId"] = cast.ToString(orderId)
-	body := SignedRequest(DELETE, https+"/api/v1/order", params)
+	body := bitrue.SignedRequestWithKey(bitrue.DELETE, ex.Host+"/api/v1/order", params, ex.AppKey, ex.SecretKey)
 	if body[:7] == `{"code"` {
 		log.Println(body)
 		return false
@@ -258,14 +263,24 @@ func (ex *Exchange) GetTiny(symbol string) float64 {
 	return 0
 }
 
-func (ex *Exchange) GetOrderMap(symbol string) map[int64]*OrderData {
+func (ex *Exchange) GetOrderMap(symbol string) map[int64]*bitrue.OrderData {
 	orders := ex.QueryOpenOrders(symbol)
 	if orders == nil {
 		return nil
 	}
-	orderMap := make(map[int64]*OrderData)
+	orderMap := make(map[int64]*bitrue.OrderData)
 	for _, order := range orders {
 		orderMap[order.OrderId] = order
 	}
 	return orderMap
+}
+
+// 获取本地当前时间
+func GetCurrentLocalTime() string {
+	return cast.ToString(time.Now().UnixNano() / 1000000)
+}
+
+// TODO 获取Bitrue服务器时间
+func GetCurrentServerTime() string {
+	return ""
 }

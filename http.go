@@ -74,62 +74,51 @@ func Map2UrlQuery(data map[string]string) string {
 }
 
 func SignedRequest(method string, url string, params map[string]string) string {
+	return SignedRequestWithKey(method, url, params, accessKey, secretKey)
+}
+
+func SignedRequestWithKey(method string, url string, params map[string]string, ak, sk string) string {
 	var paramStr string
 	if len(params) > 0 {
 		keys, values := SortByKey(params)
 		paramStr = Slice2UrlQuery(keys, values)
 	}
 	timestamp := cast.ToString(time.Now().UnixNano() / 1000000)
-	var sigStr string
-	//if method == GET {
-	//	if len(paramStr) > 0 {
-	//		url = url + "?" + paramStr
-	//	}
-	//	sigStr = method + url + timestamp
-	//} else if method == POST {
-	//	sigStr = paramStr + "&timestamp=" + timestamp
-	//}
-	if method == GET {
-		//if len(paramStr) > 0 {
-		//	url = url + "?" + paramStr
-		//}
+	if len(paramStr) > 0 {
+		paramStr += "&timestamp=" + timestamp
+	} else {
+		paramStr += "timestamp=" + timestamp
 	}
 
-	sigStr = "timestamp=" + timestamp
-	if len(paramStr) != 0 {
-		sigStr = paramStr + "&" + sigStr
-	}
+	signature := GetSignedWithSecretKey(paramStr, sk)
+	paramStr += "&signature=" + signature
 
-	signature := GetSigned(sigStr)
-	d := sigStr + "&signature=" + signature
+	request, err := http.NewRequest(method, url, strings.NewReader(paramStr))
 
-	//log.Println("url:",url)
-	request, err := http.NewRequest(method, url, strings.NewReader(d))
-	//log.Println(url)
-	//log.Println(d)
 	if err != nil {
 		log.Println(err)
 		return err.Error()
 	}
-	request.Header.Add("X-MBX-APIKEY", accessKey)
+
+	request.Header.Add("X-MBX-APIKEY", ak)
 	//request.Header.Add("FC-ACCESS-TIMESTAMP", timestamp)
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
 	httpClient := &http.Client{}
 	response, err := httpClient.Do(request)
 	if nil != err {
-		log.Println(err)
-		return err.Error()
+		log.Println("HTTP request error， url:", url, "params:", paramStr, "info:", err)
+		return ""
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if nil != err {
-		log.Println(err)
+		log.Println("HTTP response data read error， url:", url, "params:", paramStr, "info:", err)
 		return err.Error()
 	}
 
 	return string(body)
-
 }
 
 func Slice2UrlQuery(keys []string, values []string) string {
@@ -160,5 +149,11 @@ func SortByKey(mapValue map[string]string) (keys []string, values []string) {
 func GetSigned(sigStr string) string {
 	mac := hmac.New(sha256.New, []byte(secretKey))
 	mac.Write([]byte(sigStr))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+func GetSignedWithSecretKey(str, sk string) string {
+	mac := hmac.New(sha256.New, []byte(sk))
+	mac.Write([]byte(str))
 	return hex.EncodeToString(mac.Sum(nil))
 }
