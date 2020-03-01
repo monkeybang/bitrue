@@ -3,12 +3,13 @@ package bitrue
 import (
 	"encoding/json"
 	"github.com/ericlagergren/decimal"
-	"github.com/hstcscolor/bitrue"
 	"github.com/kr/pretty"
+	"github.com/monkeybang/bitrue"
 	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"log"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -197,6 +198,21 @@ func (ex *Exchange) QueryOpenOrders(symbol string) []*bitrue.OrderData {
 	params := make(map[string]string)
 	params["symbol"] = symbol
 	body := bitrue.SignedRequestWithKey(bitrue.GET, ex.Host+"/api/v1/openOrders", params, ex.AppKey, ex.SecretKey)
+	var orders []*bitrue.OrderData
+	err := json.Unmarshal([]byte(body), &orders)
+	if err != nil {
+		log.Println(err, body)
+	}
+	return orders
+}
+
+func (ex *Exchange) QueryAllOrders(symbol string, orderId int64) []*bitrue.OrderData {
+	params := make(map[string]string)
+	params["symbol"] = symbol
+	if orderId > 0 {
+		params["orderId"] = strconv.Itoa(int(orderId))
+	}
+	body := bitrue.SignedRequestWithKey(bitrue.GET, ex.Host+"/api/v1/allOrders", params, ex.AppKey, ex.SecretKey)
 	var orders []*bitrue.OrderData
 	err := json.Unmarshal([]byte(body), &orders)
 	if err != nil {

@@ -143,14 +143,16 @@ type BookTicker struct {
 }
 
 type OrderData struct {
-	Symbol      string
-	OrderId     int64 `json:",string"`
-	Price       decimal.Big
-	OrigQty     decimal.Big
-	ExecutedQty string
+	Symbol      string      `json:"symbol"`
+	OrderId     int64       `json:",string"`
+	Price       decimal.Big `json:"price"`
+	OrigQty     decimal.Big `json:"origQty"`
+	ExecutedQty string      `json:"executedQty"`
 	Side        string
 	Type        string
 	Status      string
+	Time        int64 `json:"time"`
+	UpdateTime  int64 `json:"updateTime"`
 }
 
 func (order *OrderData) Filled() float64 {
