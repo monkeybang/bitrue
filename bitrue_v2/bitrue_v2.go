@@ -163,10 +163,42 @@ func (ex *Exchange) BuyLimit(symbol string, price float64, amount float64) int64
 	return orderId
 }
 
+func (ex *Exchange) BuyMarket(symbol string, price float64, amount float64) int64 {
+	params := make(map[string]string)
+	params["type"] = "MARKET"
+	params["symbol"] = symbol
+	params["side"] = "BUY"
+	params["price"] = cast.ToString(price)
+	params["quantity"] = cast.ToString(amount)
+
+	data := bitrue.SignedRequestWithKey(bitrue.POST, ex.Host+"/api/v1/order", params, ex.AppKey, ex.SecretKey)
+
+	orderId := gjson.Get(data, "orderId").Int()
+	if orderId == 0 {
+		log.Println(data, symbol, price, amount)
+	}
+	return orderId
+}
+
 //
 func (ex *Exchange) SellLimit(symbol string, price float64, amount float64) int64 {
 	params := make(map[string]string)
 	params["type"] = "LIMIT"
+	params["symbol"] = symbol
+	params["side"] = "SELL"
+	params["price"] = cast.ToString(price)
+	params["quantity"] = cast.ToString(amount)
+	data := bitrue.SignedRequestWithKey(bitrue.POST, ex.Host+"/api/v1/order", params, ex.AppKey, ex.SecretKey)
+	orderId := gjson.Get(data, "orderId").Int()
+	if orderId == 0 {
+		log.Println(data, symbol, price, amount)
+	}
+	return orderId
+}
+
+func (ex *Exchange) SellMarket(symbol string, price float64, amount float64) int64 {
+	params := make(map[string]string)
+	params["type"] = "MARKET"
 	params["symbol"] = symbol
 	params["side"] = "SELL"
 	params["price"] = cast.ToString(price)
