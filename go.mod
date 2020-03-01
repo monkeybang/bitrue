@@ -1,4 +1,4 @@
-module github.com/hstcscolor/bitrue
+module github.com/monkeybang/bitrue
 
 go 1.13
 
