@@ -57,6 +57,15 @@ type DepthData struct {
 	Asks [][2]float64 `json:"asks"`
 }
 
+type Trade struct {
+	Id           int64
+	Price        string
+	Qty          string
+	Time         int64
+	IsBuyerMaker bool
+	IsBestMatch  bool
+}
+
 func (depthData *DepthData) UnmarshalJSON(data []byte) error {
 	dep := struct {
 		Bids [][2]*decimal.Big `json:"buys"`

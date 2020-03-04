@@ -264,3 +264,16 @@ func (ex *Exchange) GetOrderMap(symbol string) map[int64]*OrderData {
 	}
 	return orderMap
 }
+
+func GetTrades(symbol string, limit int64) []Trade {
+	params := make(map[string]string)
+	params["symbol"] = symbol
+	params["limit"] = cast.ToString(limit)
+	body := HttpGetRequest(https+"/api/v1/trades", params)
+	trades := make([]Trade, 0)
+	err := json.Unmarshal([]byte(body), &trades)
+	if err != nil {
+		log.Println(err)
+	}
+	return trades
+}
