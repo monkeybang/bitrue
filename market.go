@@ -187,6 +187,15 @@ func (order *OrderData) IsFilled() bool {
 	return order.Status == "FILLED"
 }
 
+func (order *OrderData) FilledAmount() float64 {
+	filleAmount := cast.ToFloat64(order.ExecutedQty)
+	return filleAmount
+}
+
+func (order *OrderData) UnfilledAmount() float64 {
+	return order.GetAmount() - order.FilledAmount()
+}
+
 type BalanceData struct {
 	Currency string `json:"asset"`
 	Free     decimal.Big
