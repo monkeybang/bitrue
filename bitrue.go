@@ -218,11 +218,11 @@ func (ex *Exchange) Cancel(symbol string, orderId int64) bool {
 	params["symbol"] = symbol
 	params["orderId"] = cast.ToString(orderId)
 	body := SignedRequest(DELETE, https+"/api/v1/order", params)
-	if body[:7] == `{"code"` {
-		log.Println(body)
-		return false
+	if gjson.Get(body, "orderId").Exists() {
+		return true
 	}
-	return true
+	log.Println(body)
+	return false
 }
 
 func (ex *Exchange) TruncPrice(symbol string, price float64) (float64, bool) {
