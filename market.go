@@ -151,6 +151,16 @@ type BookTicker struct {
 	AskQty   *decimal.Big
 }
 
+func (bookTicker *BookTicker) GetSellPrice() float64 {
+	price, _ := bookTicker.AskPrice.Float64()
+	return price
+}
+
+func (bookTicker *BookTicker) GetBuyPrice() float64 {
+	price, _ := bookTicker.BidPrice.Float64()
+	return price
+}
+
 type OrderData struct {
 	Symbol      string      `json:"symbol"`
 	OrderId     int64       `json:",string"`
