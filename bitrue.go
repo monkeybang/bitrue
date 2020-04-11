@@ -95,16 +95,7 @@ func (ex *Exchange) GetTickerPrice(symbol string) *decimal.Big {
 }
 
 func (ex *Exchange) GetBookTicker(symbol string) *BookTicker {
-	params := make(map[string]string)
-	params["symbol"] = symbol
-	body := HttpGetRequest(https+"/api/v1/ticker/bookTicker", params)
-
-	bookTicker := &BookTicker{}
-	err := json.Unmarshal([]byte(body), bookTicker)
-	if err != nil {
-		log.Println(err, body)
-	}
-	return bookTicker
+	return GetTicker(symbol)
 }
 
 func (ex *Exchange) GetBuyPrice(symbol string) float64 {
@@ -276,4 +267,17 @@ func GetTrades(symbol string, limit int64) []Trade {
 		log.Println(err)
 	}
 	return trades
+}
+
+func GetTicker(symbol string) *BookTicker {
+	params := make(map[string]string)
+	params["symbol"] = symbol
+	body := HttpGetRequest(https+"/api/v1/ticker/bookTicker", params)
+
+	bookTicker := &BookTicker{}
+	err := json.Unmarshal([]byte(body), bookTicker)
+	if err != nil {
+		log.Println(err, body)
+	}
+	return bookTicker
 }
