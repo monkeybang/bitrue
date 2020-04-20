@@ -248,7 +248,7 @@ func (ex *Exchange) QueryAllOrders(symbol string, orderId int64, limit int) []*b
 	if limit <= 0 {
 		limit = 10
 	}
-	params["limit"] = string(limit)
+	params["limit"] = strconv.Itoa(limit)
 
 	body := bitrue.SignedRequestWithKey(bitrue.GET, ex.Host+"/api/v1/allOrders", params, ex.AppKey, ex.SecretKey)
 	var orders []*bitrue.OrderData
