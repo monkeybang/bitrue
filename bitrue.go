@@ -54,7 +54,7 @@ func (ex *Exchange) getSymbols() {
 	symbolInfos := make([]*SymbolData, 0)
 	err := json.Unmarshal([]byte(data.String()), &symbolInfos)
 	if err != nil {
-		log.Panicln(err)
+		log.Panicln(err, body)
 	}
 	ex.SymbolInfos = symbolInfos
 }
@@ -278,6 +278,15 @@ func GetTicker(symbol string) *BookTicker {
 	err := json.Unmarshal([]byte(body), bookTicker)
 	if err != nil {
 		log.Println(err, body)
+		return nil
 	}
 	return bookTicker
+}
+
+func GetMidPrice(symbol string) float64 {
+	ticker := GetTicker(symbol)
+	if ticker == nil {
+		return 0
+	}
+	return (ticker.GetBuyPrice() + ticker.GetSellPrice()) / 2
 }
