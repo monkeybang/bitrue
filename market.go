@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-const https = "https://www.bitrue.com"
+var https = "https://www.bitrue.com"
 
 var minAmount = make(map[string]float64)
 

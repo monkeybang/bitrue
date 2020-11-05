@@ -31,6 +31,12 @@ func NewExchange(ak string, sk string) *Exchange {
 	return ex
 }
 
+func SetHost(host string) {
+	if host != "" {
+		https = host
+	}
+}
+
 //need set yourself
 func (ex *Exchange) initMinQuoteAmount() {
 	ex.MinQuoteAmountMap["BTRUSDT"] = 10
@@ -212,7 +218,6 @@ func (ex *Exchange) Cancel(symbol string, orderId int64) bool {
 	if gjson.Get(body, "orderId").Exists() {
 		return true
 	}
-	log.Println(body)
 	return false
 }
 
