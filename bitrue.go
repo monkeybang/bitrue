@@ -215,9 +215,11 @@ func (ex *Exchange) Cancel(symbol string, orderId int64) bool {
 	params["symbol"] = symbol
 	params["orderId"] = cast.ToString(orderId)
 	body := SignedRequest(DELETE, https+"/api/v1/order", params)
+	log.Println(body)
 	if gjson.Get(body, "orderId").Exists() {
 		return true
 	}
+	log.Println(body)
 	return false
 }
 

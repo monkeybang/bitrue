@@ -91,6 +91,7 @@ func SignedRequestWithKey(method string, url string, params map[string]string, a
 	}
 
 	signature := GetSignedWithSecretKey(paramStr, sk)
+	log.Println(signature)
 	paramStr += "&signature=" + signature
 
 	request, err := http.NewRequest(method, url, strings.NewReader(paramStr))
@@ -118,6 +119,7 @@ func SignedRequestWithKey(method string, url string, params map[string]string, a
 		return err.Error()
 	}
 
+	log.Println(response.Status)
 	return string(body)
 }
 
